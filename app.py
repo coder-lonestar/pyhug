@@ -1,32 +1,26 @@
-import hug
+# import hug
+from flask import Flask
 import os
 import base64
+import logging
+
+app = Flask(__name__)
 
 
-def authenticated(key, salt):
-    salt = os.environ["PYHUG_SALT"].strip('"')
+def authenticated(key):
+    salt = base64.b64decode(str.encode(os.environ["PYHUG_SALT"].strip('"'))).decode()
     password = base64.b64encode(str.encode(salt + key.strip('"'), "utf-8")).decode()
     matching_hash = os.environ["PYHUG_HASH"].strip('"')
     if password == matching_hash:
         return True
     return False
 
-@hug.get("/")
-@hug.local()
-def greet(name: hug.types.text, key: hug.types.text = "fake", hug_timer=3):
+
+@app.route("/")
+def greet(name: str, key: str = "fake"):
     """Greets user"""
-    if authenticated:
-        return {
-            "message": "Hello {0}. Have a nice day!".format(name),
-            "took": float(hug_timer),
-        }
+    if authenticated(key):
+        return {"message": "Hello {0}. Have a nice day!".format(name)}
     return {
         "message": "Unauthorized",
-        "took": float(hug_timer),
     }
-
-@hug.get('/data')
-@hug.local()
-def get_data(hug_timer=3):
-    """Returns Data"""
-    
