@@ -17,7 +17,7 @@ def authenticated(key):
 
 
 @app.route("/")
-def greet(name: str, key: str = "fake"):
+def greet(name: str = "dummy", key: str = "fake"):
     """Greets user"""
     if authenticated(key):
         return {"message": "Hello {0}. Have a nice day!".format(name)}
